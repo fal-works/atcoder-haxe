@@ -1,0 +1,4 @@
+--class-path A
+--java bin/java
+--main Main
+--cmd java -jar bin/java/Main.jar
