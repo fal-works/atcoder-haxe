@@ -7,7 +7,8 @@
 			"problemMatcher": [
 				"$haxe-absolute",
 				"$haxe",
-				"$haxe-error"
+				"$haxe-error",
+				"$haxe-trace"
 			],
 			"group": {
 				"kind": "build",

@@ -1,0 +1,4 @@
+--class-path A
+--main Main
+--interp
+# --cmd "if exist A/1.txt haxe --class-path A --main Main --interp < A/1.txt"
