@@ -1,5 +1,5 @@
+common.hxml
 --class-path A
---main Main
 --java bin/java
 --cmd if exist A/1.txt echo _________________________________________________________
 --cmd if exist A/1.txt echo [CASE 1]
