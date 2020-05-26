@@ -1,0 +1,82 @@
+class Main {
+	static inline final aUnitAmount = 500;
+	static inline final bUnitAmount = 100;
+	static inline final cUnitAmount = 50;
+
+	static function main() {
+		final cin = new CharIn();
+		final a = cin.int(LF);
+		final b = cin.int(LF);
+		final c = cin.int(LF);
+		final x = cin.int(LF);
+
+		final aMaxAmount = a * aUnitAmount;
+		final bMaxAmount = b * bUnitAmount;
+		final cMaxAmount = c * cUnitAmount;
+
+		var validCount = 0;
+
+		var aAmount = 0;
+		while (aAmount <= aMaxAmount) {
+			var abAmount = aAmount;
+			final abMaxAmount = abAmount + bMaxAmount;
+			while (abAmount <= abMaxAmount) {
+				if (abAmount <= x && x <= abAmount + cMaxAmount)
+					++validCount;
+
+				abAmount += bUnitAmount;
+			}
+
+			aAmount += aUnitAmount;
+		}
+
+		Sys.println(validCount);
+	}
+}
+
+
+/**
+	wronganswer v0.2.0-alpha / CC0
+	https://github.com/fal-works/wronganswer
+**/
+
+abstract CharIn(haxe.io.Input) {
+	public extern inline function new()
+		this = Sys.stdin();
+
+	public inline function byte()
+		return this.readByte();
+
+	public inline function digit()
+		return byte() - "0".code;
+
+	public inline function char()
+		return String.fromCharCode(byte());
+
+	public inline function str(delimiter:Int) {
+		final buffer = new haxe.io.BytesBuffer();
+		try {
+			var byte:Int;
+			while ((byte = this.readByte()) != delimiter)
+				buffer.addByte(byte);
+		} catch (e:haxe.io.Eof) {}
+
+		return buffer.getBytes().toString();
+	}
+
+	public inline function int(delimiter:Int):Int
+		return Ut.atoi(str(delimiter));
+}
+
+enum abstract Delimiter(Int) to Int {
+	final LF = "\n".code;
+	final SP = " ".code;
+}
+
+class Ut {
+	@:noUsing public static macro function debug(message:haxe.macro.Expr):haxe.macro.Expr
+		return macro null;
+
+	@:pure public static inline function atoi(s:String):Int
+		return Std.parseInt(s);
+}
