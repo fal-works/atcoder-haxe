@@ -1,0 +1,361 @@
+
+class Main {
+	static function main() {
+		final cin = new CharIn(10);
+		final n = cin.int();
+		final a = cin.intVec(n);
+
+		var min = 31;
+		for (v in a) {
+			final count = (v:Bits).trailingZeros();
+			Ut.debug('$v: $count');
+			if (count < min) min = count;
+		}
+
+		Sys.println(min);
+	}
+}
+
+
+/**
+	wronganswer v0.2.0-alpha / CC0
+	https://github.com/fal-works/wronganswer
+**/
+
+abstract CharIn(haxe.io.Input) {
+	static var byteArray:#if macro Dynamic; #else java.NativeArray<java.types.Int8>; #end
+
+	@:pure static inline function isNotWhiteSpace(characterCode:Int):Bool {
+		return switch characterCode {
+			case " ".code | "\t".code | "\n".code | "\r".code:
+				false;
+			default:
+				true;
+		}
+	}
+
+	public extern inline function new(bufferCapacity:Int) {
+		this = Sys.stdin();
+		#if !macro
+		byteArray = new java.NativeArray(bufferCapacity);
+		#end
+	}
+
+	public inline function byte():Int
+		return this.readByte();
+
+	public inline function digit():Int
+		return byte() - "0".code;
+
+	public inline function char():String
+		return String.fromCharCode(byte());
+
+	public inline function token():String {
+		final byteArray = CharIn.byteArray;
+		var index = 0;
+
+		try {
+			var byte = this.readByte();
+			while (isNotWhiteSpace(byte)) {
+				byteArray[index] = byte;
+				++index;
+				byte = this.readByte();
+			}
+		} catch (e:haxe.io.Eof) {}
+
+		try {
+			return #if macro ""; #else new String(byteArray, 0, index, "UTF-8"); #end
+		} catch (e:Dynamic) {
+			throw e;
+		}
+	}
+
+	public inline function int():Int {
+		var result = 0;
+		var negative = false;
+		try {
+			var byte = this.readByte();
+			if (byte == '-'.code) {
+				negative = true;
+				byte = this.readByte();
+			}
+			while (isNotWhiteSpace(byte)) {
+				result = 10 * result + byte - "0".code;
+				byte = this.readByte();
+			}
+		} catch (e:haxe.io.Eof) {}
+
+		return if (negative) -result else result;
+	}
+
+	public inline function float():Float
+		return Ut.atof(token());
+
+	public inline function tokenVec(length:Int):haxe.ds.Vector<String> {
+		final vec = new haxe.ds.Vector<String>(length);
+		for (i in 0...length)
+			vec[i] = token();
+		return vec;
+	}
+
+	public inline function intVec(length:Int):haxe.ds.Vector<Int> {
+		final vec = new haxe.ds.Vector<Int>(length);
+		for (i in 0...length)
+			vec[i] = int();
+		return vec;
+	}
+
+	public inline function floatVec(length:Int):haxe.ds.Vector<Float> {
+		final vec = new haxe.ds.Vector<Float>(length);
+		for (i in 0...length)
+			vec[i] = float();
+		return vec;
+	}
+
+	public inline function str(delimiter:Delimiter):String {
+		final byteArray = CharIn.byteArray;
+		var index = 0;
+
+		try {
+			var byte = this.readByte();
+			while (byte != delimiter) {
+				byteArray[index] = byte;
+				++index;
+				byte = this.readByte();
+			}
+		} catch (e:haxe.io.Eof) {}
+
+		try {
+			return #if macro ""; #else new String(byteArray, 0, index, "UTF-8"); #end
+		} catch (e:Dynamic) {
+			throw e;
+		}
+	}
+
+	public inline function uint():Int
+		return uintWithRadix(10);
+
+	public inline function binary():Int
+		return uintWithRadix(2);
+
+	public inline function count(characterCode:Int):Int {
+		var foundCount = 0;
+		try {
+			var byte = this.readByte();
+			while (isNotWhiteSpace(byte)) {
+				if (byte == characterCode)
+					++foundCount;
+				byte = this.readByte();
+			}
+		} catch (e:haxe.io.Eof) {}
+
+		return foundCount;
+	}
+
+	inline function uintWithRadix(radix:Int):Int {
+		var result = 0;
+		try {
+			var byte = this.readByte();
+			while (isNotWhiteSpace(byte)) {
+				result = radix * result + byte - "0".code;
+				byte = this.readByte();
+			}
+		} catch (e:haxe.io.Eof) {}
+
+		return result;
+	}
+}
+
+@:forward
+abstract CharOut(StringBuffer) {
+	public inline function new(capacity = 1024) {
+		this = new StringBuffer(capacity);
+	}
+
+	public inline function print():Void
+		Sys.print(this.toString());
+
+	public inline function println():Void
+		Sys.println(this.toString());
+}
+
+enum abstract Delimiter(Int) to Int {
+	final LF = "\n".code;
+	final SP = " ".code;
+	final HT = "\t".code;
+	final Slash = "/".code;
+	final BackSlash = "\\".code;
+	final Pipe = "|".code;
+	final Comma = ",".code;
+	final Dot = ".".code;
+}
+
+@:forward(length, toString)
+abstract StringBuffer(#if macro Dynamic #else java.lang.StringBuilder #end)
+#if !macro from java.lang.StringBuilder
+#end
+{
+	public inline function new(capacity = 16) {
+		this = #if macro null; #else new java.lang.StringBuilder(capacity); #end
+	}
+
+	public inline function str(s:String):StringBuffer
+		return this.append(s);
+
+	public inline function int(v:Int):StringBuffer
+		return this.append(v);
+
+	public inline function float(v:Float):StringBuffer
+		return this.append(v);
+
+	public inline function floatWithScale(v:Float, scale:Int):StringBuffer {
+		if (v < 0) {
+			this.appendCodePoint("-".code);
+			v = -v;
+		}
+		v += Math.pow(10.0, -scale) / 2.0;
+
+		this.append(cast(v, haxe.Int64));
+		if (scale != 0) {
+			this.appendCodePoint(".".code);
+			v -= cast(cast(v, haxe.Int64), Float);
+
+			for (i in 0...scale) {
+				v *= 10.0;
+				this.append(((cast v):Int));
+				v -= Std.int(v);
+			}
+		}
+
+		return this;
+	}
+
+	public inline function int64(v:haxe.Int64):StringBuffer
+		return this.append(v);
+
+	public inline function char(code:Int):StringBuffer
+		return this.appendCodePoint(code);
+
+	public inline function lf():StringBuffer
+		return char("\n".code);
+
+	public inline function space():StringBuffer
+		return char(" ".code);
+}
+
+class Ut {
+	@:noUsing public static macro function debug(message:haxe.macro.Expr):haxe.macro.Expr
+		return macro null;
+
+	@:pure public static inline function atoi(s:String):Int
+		return #if macro 0; #else java.lang.Integer.parseInt(s, 10); #end
+
+	@:pure public static inline function atof(s:String):Float
+		return #if macro 0; #else java.lang.Double.DoubleClass.parseDouble(s); #end
+
+	@:pure public static inline function ctoa(characterCode:Int):String
+		return String.fromCharCode(characterCode);
+
+	@:pure public static inline function ftoa(v:Float, scale:Int):String {
+		final buffer = new StringBuffer(15 + scale);
+		buffer.floatWithScale(v, scale);
+		return buffer.toString();
+	}
+
+	@:generic @:noUsing
+	public static inline function vec<T>(length:Int, factory:(index:Int) -> T):haxe.ds.Vector<T> {
+		final vec = new haxe.ds.Vector<T>(length);
+		for (i in 0...length)
+			vec[i] = factory(i);
+		return vec;
+	}
+}
+
+abstract Bits(Int) from Int to Int {
+	public static inline function from(v:Int):Bits
+		return v;
+
+	@:op(A << B) static function leftShift(bits:Bits, shiftCount:Int):Bits;
+
+	@:op(A >> B) static function rightShift(bits:Bits, shiftCount:Int):Bits;
+
+	@:op(A >>> B) static function unsignedRightShift(bits:Bits, shiftCount:Int):Bits;
+
+	@:op(A == B) static function equal(a:Bits, b:Bits):Bool;
+
+	@:op(A != B) static function notEqual(a:Bits, b:Bits):Bool;
+
+	@:op(A & B) static function and(a:Bits, b:Bits):Bits;
+
+	@:op(A | B) static function or(a:Bits, b:Bits):Bits;
+
+	@:op(A ^ B) static function xor(a:Bits, b:Bits):Bits;
+
+	@:op(~A) static function negate(a:Bits):Bits;
+
+	@:op([]) public inline function get(index:Int):Bool {
+		return this & (1 << index) != 0;
+	}
+
+	public static inline function set(bits:Bits, index:Int):Bits {
+		return bits | (1 << index);
+	}
+
+	public static inline function unset(bits:Bits, index:Int):Bits {
+		return bits & ~(1 << index);
+	}
+
+	public inline function countOnes():Int {
+		var n = this;
+		n = n - ((n >>> 1) & 0x55555555);
+		n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
+		n = (((n + (n >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+		return n;
+	}
+
+	public inline function trailingZeros():Int {
+		var n = this;
+		var count = 0;
+		while (n & 1 == 0) {
+			++count;
+			n >>>= 1;
+		}
+		return count;
+	}
+
+	public inline function trailingOnes():Int {
+		var n = this;
+		var count = 0;
+		while (n & 1 != 0) {
+			++count;
+			n >>>= 1;
+		}
+		return count;
+	}
+
+	public inline function toBoolVec(length:Int):haxe.ds.Vector<Bool> {
+		final vec = new haxe.ds.Vector(length);
+		var bitMask = 1;
+		for (i in 0...length) {
+			vec[i] = this & bitMask != 0;
+			bitMask <<= 1;
+		}
+		return vec;
+	}
+
+	public inline function forEachBit(callback:(flag:Bool) -> Void, length:Int):Void {
+		var bitMask = 1;
+		for (i in 0...length) {
+			callback(this & bitMask != 0);
+			bitMask <<= 1;
+		}
+	}
+
+	public inline function forEachBitReversed(callback:(flag:Bool) -> Void, length:Int):Void {
+		var bitMask = 1 << (length - 1);
+		for (i in 0...length) {
+			callback(this & bitMask != 0);
+			bitMask >>>= 1;
+		}
+	}
+}
