@@ -1,0 +1,5 @@
+common.hxml
+--class-path C
+--java ..\bin\java
+--cmd ..\test_java.bat %CD%\C
+--cmd ..\replace-imports.bat %CD%\C\Main.hx
