@@ -2,4 +2,4 @@ common.hxml
 --class-path A
 --java ..\bin\java
 --cmd ..\test_java.bat %CD%\A
---cmd ..\bundle.bat %CD%\A\Main.hx
+--cmd ..\bundle.bat %CD%\A\Main.hx java
