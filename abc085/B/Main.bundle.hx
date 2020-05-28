@@ -1,4 +1,5 @@
-using Main.Vec;
+using Main.Vecs;
+using Main.Printer;
 
 class Main {
 	static function main() {
@@ -7,9 +8,9 @@ class Main {
 		final d = cin.intVec(n);
 
 		d.quicksort((a, b) -> a - b);
-		final deduplicatedCount = d.dedup(d);
+		final dedupCount = d.dedup(d);
 
-		Util.println(deduplicatedCount);
+		dedupCount.println();
 	}
 }
 
@@ -47,7 +48,7 @@ abstract CharIn(haxe.io.Input) {
 	public inline function char():String
 		return String.fromCharCode(byte());
 
-	public inline function token():String {
+	public inline function str():String {
 		final byteArray = CharIn.byteArray;
 		var index = 0;
 
@@ -85,13 +86,16 @@ abstract CharIn(haxe.io.Input) {
 		return if (negative) -result else result;
 	}
 
-	public inline function float():Float
-		return Util.atof(token());
+	public inline function uint():Int
+		return uintWithRadix(10);
 
-	public inline function tokenVec(length:Int):haxe.ds.Vector<String> {
+	public inline function binary():Int
+		return uintWithRadix(2);
+
+	public inline function strVec(length:Int):haxe.ds.Vector<String> {
 		final vec = new haxe.ds.Vector<String>(length);
 		for (i in 0...length)
-			vec[i] = token();
+			vec[i] = str();
 		return vec;
 	}
 
@@ -102,51 +106,11 @@ abstract CharIn(haxe.io.Input) {
 		return vec;
 	}
 
-	public inline function floatVec(length:Int):haxe.ds.Vector<Float> {
-		final vec = new haxe.ds.Vector<Float>(length);
+	public inline function uintVec(length:Int):haxe.ds.Vector<Int> {
+		final vec = new haxe.ds.Vector<Int>(length);
 		for (i in 0...length)
-			vec[i] = float();
+			vec[i] = uint();
 		return vec;
-	}
-
-	public inline function str(delimiter:Delimiter):String {
-		final byteArray = CharIn.byteArray;
-		var index = 0;
-
-		try {
-			var byte = this.readByte();
-			while (byte != delimiter) {
-				byteArray[index] = byte;
-				++index;
-				byte = this.readByte();
-			}
-		} catch (e:haxe.io.Eof) {}
-
-		try {
-			return #if macro ""; #else new String(byteArray, 0, index, "UTF-8"); #end
-		} catch (e:Dynamic) {
-			throw e;
-		}
-	}
-
-	public inline function uint():Int
-		return uintWithRadix(10);
-
-	public inline function binary():Int
-		return uintWithRadix(2);
-
-	public inline function count(characterCode:Int):Int {
-		var foundCount = 0;
-		try {
-			var byte = this.readByte();
-			while (isNotWhiteSpace(byte)) {
-				if (byte == characterCode)
-					++foundCount;
-				byte = this.readByte();
-			}
-		} catch (e:haxe.io.Eof) {}
-
-		return foundCount;
 	}
 
 	inline function uintWithRadix(radix:Int):Int {
@@ -163,18 +127,7 @@ abstract CharIn(haxe.io.Input) {
 	}
 }
 
-enum abstract Delimiter(Int) to Int {
-	final LF = "\n".code;
-	final SP = " ".code;
-	final HT = "\t".code;
-	final Slash = "/".code;
-	final BackSlash = "\\".code;
-	final Pipe = "|".code;
-	final Comma = ",".code;
-	final Dot = ".".code;
-}
-
-class Util {
+class Printer {
 	@:generic public static inline function print<T>(x:T):Void {
 		#if !macro
 		untyped __java__("java.lang.System.out.print({0});", x);
@@ -186,83 +139,9 @@ class Util {
 		untyped __java__("java.lang.System.out.println({0});", x);
 		#end
 	}
-
-	@:pure public static inline function idiv(n:Int, divisor:Int):Int
-		return #if macro 0; #else untyped __java__("{0} / {1}", n, divisor); #end
-
-	@:pure public static inline function atoi(s:String):Int
-		return #if macro 0; #else java.lang.Integer.parseInt(s, 10); #end
-
-	@:pure public static inline function atof(s:String):Float
-		return #if macro 0; #else java.lang.Double.DoubleClass.parseDouble(s); #end
-
-	@:pure public static inline function ctoa(characterCode:Int):String
-		return String.fromCharCode(characterCode);
-
-	@:pure public static inline function ftoa(v:Float, scale:Int):String {
-		final buffer = new StringBuffer(15 + scale);
-		buffer.floatWithScale(v, scale);
-		return buffer.toString();
-	}
-
-	@:pure public static inline function compareString(a:String, b:String):Int
-		return if (a < b) -1 else if (a > b) 1 else 0;
 }
 
-@:forward(length, toString)
-abstract StringBuffer(#if macro Dynamic #else java.lang.StringBuilder #end)
-#if !macro from java.lang.StringBuilder
-#end
-{
-	public inline function new(capacity = 16) {
-		this = #if macro null; #else new java.lang.StringBuilder(capacity); #end
-	}
-
-	public inline function str(s:String):StringBuffer
-		return this.append(s);
-
-	public inline function int(v:Int):StringBuffer
-		return this.append(v);
-
-	public inline function float(v:Float):StringBuffer
-		return this.append(v);
-
-	public inline function floatWithScale(v:Float, scale:Int):StringBuffer {
-		if (v < 0) {
-			this.appendCodePoint("-".code);
-			v = -v;
-		}
-		v += Math.pow(10.0, -scale) / 2.0;
-
-		this.append(cast(v, haxe.Int64));
-		if (scale != 0) {
-			this.appendCodePoint(".".code);
-			v -= cast(cast(v, haxe.Int64), Float);
-
-			for (i in 0...scale) {
-				v *= 10.0;
-				this.append(((cast v) : Int));
-				v -= Std.int(v);
-			}
-		}
-
-		return this;
-	}
-
-	public inline function int64(v:haxe.Int64):StringBuffer
-		return this.append(v);
-
-	public inline function char(code:Int):StringBuffer
-		return this.appendCodePoint(code);
-
-	public inline function lf():StringBuffer
-		return char("\n".code);
-
-	public inline function space():StringBuffer
-		return char(" ".code);
-}
-
-class Vec {
+class Vecs {
 	static var quicksortStack = new haxe.ds.Vector<Int>(64);
 
 	@:generic @:noUsing

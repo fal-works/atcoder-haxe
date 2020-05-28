@@ -1,6 +1,7 @@
-import wronganswer.CharIn;
-import wronganswer.Util;
-using wronganswer.Vec;
+import wa.CharIn;
+
+using wa.Vecs;
+using wa.Printer;
 
 class Main {
 	static function main() {
@@ -9,8 +10,8 @@ class Main {
 		final d = cin.intVec(n);
 
 		d.quicksort((a, b) -> a - b);
-		final deduplicatedCount = d.dedup(d);
+		final dedupCount = d.dedup(d);
 
-		Util.println(deduplicatedCount);
+		dedupCount.println();
 	}
 }
