@@ -1,7 +1,6 @@
-import wa.naive.CharIn;
+import wa.CharIn;
+import wa.CharOut;
 import wa.Debug;
-
-using wa.Printer;
 
 class Main {
 	static inline final aUnitAmount = 10000;
@@ -9,9 +8,9 @@ class Main {
 	static inline final cUnitAmount = 1000;
 
 	static function main() {
-		final cin = new CharIn();
-		final n = cin.int();
-		final y = cin.int();
+		final cin = new CharIn(8);
+		final n = cin.uint();
+		final y = cin.uint();
 
 		var aValidCount = -1;
 		var bValidCount = -1;
@@ -55,6 +54,10 @@ class Main {
 			aAmount += aUnitAmount;
 		}
 
-		'$aValidCount $bValidCount $cValidCount'.println();
+		final cout = new CharOut();
+		cout.int(aValidCount).space();
+		cout.int(bValidCount).space();
+		cout.int(cValidCount);
+		cout.println();
 	}
 }
