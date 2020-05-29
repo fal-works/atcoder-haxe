@@ -1,0 +1,5 @@
+common.hxml
+--class-path B
+--java ..\bin\java
+--cmd ..\test_java.bat %CD%\B
+--cmd ..\bundle.bat %CD%\B\Main.hx java
