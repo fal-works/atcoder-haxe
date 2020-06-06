@@ -1,0 +1,4 @@
+common-js.hxml
+--class-path C
+--cmd ..\test_js.bat %CD%\C
+# --cmd ..\bundle.bat %CD%\C\Main.hx js
