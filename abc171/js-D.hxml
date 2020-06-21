@@ -1,0 +1,6 @@
+common.hxml
+--class-path D
+--library hxnodejs
+--js ..\bin\js\main.js
+--cmd ..\test_js.bat %CD%\D
+--cmd ..\bundle.bat %CD%\D\Main.hx js
