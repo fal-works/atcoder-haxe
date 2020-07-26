@@ -1,0 +1,3 @@
+common.hxml
+--class-path B
+--cmd ..\test_eval.bat %CD%\B
